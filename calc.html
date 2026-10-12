@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>מחשבון משכנתא</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef2f7;--card:#fff;--ink:#14213d;--mut:#5b6b85;--line:#d9e0ea;--acc:#0f766e;--acc2:#e8f5f3;--warn:#b45309;--c1:#0f766e;--c2:#b45309;--c3:#4f46e5;--c4:#be185d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1624;--card:#18223a;--ink:#e8edf7;--mut:#9aa8c2;--line:#2b3956;--acc:#2dd4bf;--acc2:#12332f;--warn:#fbbf24;--c1:#2dd4bf;--c2:#fbbf24;--c3:#a5b4fc;--c4:#f472b6}}
+:root[data-theme="dark"]{--bg:#0f1624;--card:#18223a;--ink:#e8edf7;--mut:#9aa8c2;--line:#2b3956;--acc:#2dd4bf;--acc2:#12332f;--warn:#fbbf24;--c1:#2dd4bf;--c2:#fbbf24;--c3:#a5b4fc;--c4:#f472b6}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 Heebo,Arial,sans-serif}
+main{max-width:980px;margin:0 auto;padding:16px}
+h1{font-size:26px;margin:8px 0 2px}h2{font-size:18px;margin:0 0 10px}
+.sub{color:var(--mut);margin:0 0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tab{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:8px;font:inherit;cursor:pointer;border-inline-start:5px solid var(--c)}
+.tab[aria-selected=true]{background:var(--acc2);font-weight:700}
+button{font:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.route{border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+label{display:block;font-size:13px;color:var(--mut)}
+input,select{width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit;margin-top:3px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:space-between;margin-top:10px}
+.btn{border:1px solid var(--acc);background:var(--acc);color:#fff;padding:8px 14px;border-radius:8px}
+:root[data-theme="dark"] .btn{color:#0f1624}
+.btn.o{background:transparent;color:var(--acc)}
+.lnk{background:none;border:0;color:var(--acc);padding:0;text-decoration:underline}
+.adv{margin-top:10px;padding:10px;background:var(--bg);border-radius:8px}
+.adv h3{font-size:14px;margin:8px 0 4px}
+.out{font-size:13px;color:var(--mut);margin-top:8px}.out b{color:var(--ink)}
+.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.sum div{background:var(--acc2);border-radius:10px;padding:10px}
+.sum span{display:block;font-size:12px;color:var(--mut)}.sum b{font-size:19px}
+.warn{color:var(--warn);font-size:14px;margin:6px 0}
+.sc{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:520px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:start;white-space:nowrap}
+th{color:var(--mut);font-weight:500}
+.note{font-size:12px;color:var(--mut)}
+svg{width:100%;height:auto;display:block}
+[hidden]{display:none!important}
+textarea{width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:12px/1.4 monospace;direction:ltr;margin-top:6px}
+.rec{background:var(--acc2);border:1px solid var(--acc);border-radius:10px;padding:12px;margin-bottom:14px}
+</style>
+</head>
+<body>
+<main>
+<h1>מחשבון משכנתא</h1>
+<p class="sub">בנו עד ארבעה תמהילים, הוסיפו גרייס, שינוי ריבית וסילוק עתידי, והשוו ביניהם.</p>
+<div class="row" style="margin:0 0 12px;justify-content:flex-start"><button class="btn" id="sv">שמירה</button><button class="btn o" id="exp">ייצוא השוואה</button><button class="btn o" id="imp">ייבוא השוואה</button><span class="note" id="svm">נשמר אוטומטית בדפדפן זה</span></div>
+<div class="card" id="share" hidden></div>
+
+<div class="tabs" id="tabs" role="tablist"></div>
+<div class="card" id="editor"></div>
+<div class="card" id="summary"></div>
+<div class="card" id="compare"></div>
+<div class="card" id="schedule"></div>
+<p class="note">החישוב מבוסס על ריבית נומינלית שנתית וחלוקה ל-12. אין בו עמלות, ביטוחים או עמלת פירעון מוקדם. הריביות ההתחלתיות הן להמחשה בלבד – יש להזין את הריביות שקיבלתם מהבנק. הכלי להמחשה ואינו מהווה ייעוץ.</p>
+</main>
+<script>
+const TYPES={prime:['פריים',0,1,0],kz:['קבועה צמודה',1,0,1],klz:['קבועה לא צמודה',0,0,1],mz5:['משתנה כל 5 צמודה',1,0,0],mlz5:['משתנה כל 5 לא צמודה',0,0,0],state:['זכאות מדינה',1,0,0],mak:['עוגן מק"מ',0,1,0],v1:['משתנה כל שנה צמודה',1,1,0],v2:['משתנה כל שנתיים צמודה',1,1,0],v10:['משתנה כל 10 שנים צמודה',1,0,0]};
+const DEF={prime:[240,5.5],kz:[300,4.0],klz:[240,5.0],mz5:[300,3.4],mlz5:[240,4.9],state:[240,3.0],mak:[240,4.8],v1:[240,3.3],v2:[240,3.3],v10:[300,3.6]};
+const COL=['var(--c1)','var(--c2)','var(--c3)','var(--c4)'];
+const NF=new Intl.NumberFormat('he-IL',{maximumFractionDigits:0});
+const fm=x=>NF.format(Math.round(x))+' ₪';
+function newRoute(type='kz',amount=500000){const [m,r]=DEF[type];return{type,amount,method:'spitzer',months:m,rate:r,indexed:!!TYPES[type][1],index:2.5,grace:0,rc:false,rcMonth:60,rcDelta:2,er:false,erMonth:120,erFull:false,erAmt:100000,erMode:'shorten',adv:false}}
+const S={cur:0,view:'year',screen:'edit',names:['תמהיל 1','תמהיל 2','תמהיל 3','תמהיל 4'],mixes:[[newRoute('prime',300000),newRoute('kz',400000),newRoute('klz',300000)],[],[],[]]};
+try{const sv=JSON.parse(localStorage.getItem('mortgage-mixes-v1')||'null');if(sv&&sv.mixes&&sv.names){S.mixes=sv.mixes;S.names=sv.names}}catch(e){}
+function save(){try{localStorage.setItem('mortgage-mixes-v1',JSON.stringify({mixes:S.mixes,names:S.names}))}catch(e){}}
+
+function sim(o){
+ const n=Math.max(1,Math.round(o.months)),A=+o.amount||0;if(!A)return[];
+ let bal=A,rows=[],fPmt=null,fPrin=null,rate=o.rate/100;
+ const im=o.indexed?Math.pow(1+o.index/100,1/12)-1:0;
+ for(let t=1;t<=n&&bal>0.5;t++){
+  const idx=bal*im;bal+=idx;
+  if(o.rc&&t>=o.rcMonth)rate=(o.rate+o.rcDelta)/100;
+  const r=rate/12,int=bal*r,rem=n-t+1;let prin;
+  if(o.method==='bullet')prin=t===n?bal:0;
+  else if(t<=o.grace)prin=0;
+  else if(o.method==='equal')prin=fPrin?Math.min(fPrin,bal):bal/rem;
+  else{const p=fPmt||(r?bal*r/(1-Math.pow(1+r,-rem)):bal/rem);prin=Math.min(p-int,bal);if(prin<0)prin=0}
+  if(t===n)prin=bal;
+  bal-=prin;const pay=prin+int;let lump=0;
+  if(o.er&&t===o.erMonth){lump=o.erFull?bal:Math.min(o.erAmt,bal);bal-=lump;
+   if(!o.erFull&&o.erMode==='shorten'){if(o.method==='spitzer')fPmt=pay;else if(o.method==='equal'&&prin>0)fPrin=prin}}
+  rows.push({t,prin,int,idx,pay,lump,bal});
+ }
+ return rows;
+}
+function mixCalc(routes){
+ const per=routes.map(sim),L=Math.max(0,...per.map(r=>r.length));const m=[];
+ for(let i=0;i<L;i++){const c={t:i+1,prin:0,int:0,idx:0,pay:0,lump:0,bal:0};per.forEach(r=>{const x=r[i];if(x)for(const k of['prin','int','idx','pay','lump','bal'])c[k]+=x[k]});m.push(c)}
+ const loan=routes.reduce((s,r)=>s+(+r.amount||0),0);
+ const tot=m.reduce((s,c)=>s+c.pay+c.lump,0);
+ return{per,m,loan,first:m[0]?m[0].pay:0,max:Math.max(0,...m.map(c=>c.pay)),int:m.reduce((s,c)=>s+c.int,0),idx:m.reduce((s,c)=>s+c.idx,0),tot,ratio:loan?tot/loan:0,len:L};
+}
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function renderTabs(){
+ $('tabs').innerHTML=S.mixes.map((m,i)=>`<button class="tab" style="--c:${COL[i]}" role="tab" aria-selected="${i===S.cur&&S.screen==='edit'}" data-i="${i}">${esc(S.names[i])}${m.length?'':' (ריק)'}</button>`).join('')+`<button class="btn" id="goCmp" style="margin-inline-start:auto">השוואת תמהילים</button>`;
+ $('tabs').querySelectorAll('.tab').forEach(b=>b.onclick=()=>{S.cur=+b.dataset.i;S.screen='edit';renderAll()});
+ $('goCmp').onclick=()=>{S.screen='compare';renderAll()};
+}
+function routeHTML(o,k){
+ const T=TYPES[o.type],opts=Object.entries(TYPES).map(([id,v])=>`<option value="${id}"${id===o.type?' selected':''}>${v[0]}</option>`).join('');
+ const sel=(f,vals)=>vals.map(([v,l])=>`<option value="${v}"${o[f]===v?' selected':''}>${l}</option>`).join('');
+ const n=(f,l,step='any',extra='')=>`<label>${l}<input type="number" inputmode="decimal" step="${step}" min="0" data-k="${k}" data-f="${f}" value="${o[f]}" ${extra}></label>`;
+ const rs=sim(o),first=rs[0],tot=rs.reduce((s,c)=>s+c.pay+c.lump,0);
+ return `<div class="route"><div class="grid">
+ <label>מסלול<select data-k="${k}" data-f="type">${opts}</select></label>
+ ${n('amount','סכום (₪)',1000)}
+ <label>שיטת החזר<select data-k="${k}" data-f="method">${sel('method',[['spitzer','שפיצר'],['equal','קרן שווה'],['bullet','בוליט']])}</select></label>
+ ${n('months','תקופה (חודשים)',1)}
+ ${n('rate','ריבית שנתית (%)','0.01')}
+ ${o.indexed?n('index','מדד שנתי (%)','0.1'):''}
+ </div>
+ <div class="out">החזר חודשי: <b>${first?fm(first.pay):'-'}</b> · החזר כולל: <b>${fm(tot)}</b></div>
+ <div class="row"><button class="lnk" data-k="${k}" data-adv>${o.adv?'הסתר מתקדם':'מתקדם +'}</button><button class="lnk" data-k="${k}" data-del>הסר מסלול</button></div>
+ ${o.adv?`<div class="adv">
+  <h3>גרייס</h3><div class="grid">${n('grace','חודשי גרייס (עד 60)',1,'max="60"')}</div>
+  <h3><label style="display:inline"><input type="checkbox" style="width:auto" data-k="${k}" data-f="rc" ${o.rc?'checked':''}> שינוי ריבית עתידי</label></h3>
+  ${o.rc?`<div class="grid">${n('rcMonth','בחודש',1)}${n('rcDelta','שינוי בנקודות אחוז','0.1')}</div>`:''}
+  <h3><label style="display:inline"><input type="checkbox" style="width:auto" data-k="${k}" data-f="er" ${o.er?'checked':''}> סילוק עתידי</label></h3>
+  ${o.er?`<div class="grid">${n('erMonth','בחודש',1)}
+   <label>סוג סילוק<select data-k="${k}" data-f="erFull">${[[false,'חלקי'],[true,'מלא']].map(([v,l])=>`<option value="${v}"${o.erFull===v?' selected':''}>${l}</option>`).join('')}</select></label>
+   ${o.erFull?'':n('erAmt','סכום לסילוק (₪)',1000)}
+   ${o.erFull?'':`<label>לאחר הסילוק<select data-k="${k}" data-f="erMode">${sel('erMode',[['shorten','קיצור תקופה'],['reduce','הורדת החזר']])}</select></label>`}</div>`:''}
+ </div>`:''}</div>`;
+}
+function renderEditor(){
+ const rs=S.mixes[S.cur];
+ $('editor').innerHTML=`<label>שם התמהיל<input id="mname" maxlength="30" value="${esc(S.names[S.cur])}"></label><h2 style="margin-top:14px">מסלולים</h2>`+(rs.length?rs.map(routeHTML).join(''):'<p class="sub">אין מסלולים בתמהיל. הוסיפו מסלול כדי להתחיל.</p>')+
+ `<div class="row"><button class="btn o" id="add">+ הוספת מסלול</button>${rs.length?'<button class="lnk" id="dup">שכפול התמהיל לתמהיל הבא הפנוי</button>':''}</div>`;
+ const ed=$('editor');
+ ed.querySelectorAll('[data-f]').forEach(el=>el.onchange=()=>{
+  const o=rs[+el.dataset.k],f=el.dataset.f;
+  if(el.type==='checkbox')o[f]=el.checked;
+  else if(f==='erFull')o[f]=el.value==='true';
+  else if(['type','method','erMode'].includes(f))o[f]=el.value;
+  else o[f]=parseFloat(el.value)||0;
+  if(f==='type'){const [m,r]=DEF[o.type];o.months=m;o.rate=r;o.indexed=!!TYPES[o.type][1]}
+  renderAll();
+ });
+ ed.querySelectorAll('[data-adv]').forEach(b=>b.onclick=()=>{const o=rs[+b.dataset.k];o.adv=!o.adv;renderAll()});
+ ed.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{rs.splice(+b.dataset.k,1);renderAll()});
+ $('add').onclick=()=>{rs.push(newRoute('kz',200000));renderAll()};
+ 
+ $('mname').oninput=e=>{S.names[S.cur]=e.target.value;save();renderTabs();renderSummary();renderSchedule()};
+ if($('dup'))$('dup').onclick=()=>{const j=S.mixes.findIndex((m,i)=>i!==S.cur&&!m.length);if(j<0)return alert('כל ארבעת התמהילים תפוסים');S.mixes[j]=JSON.parse(JSON.stringify(rs));S.names[j]=S.names[S.cur]+' (עותק)';S.cur=j;renderAll()};
+}
+function warnings(rs,loan){
+ if(!loan)return'';let w=[];
+ const sh=rs.filter(o=>TYPES[o.type][2]).reduce((s,o)=>s+o.amount,0)/loan;
+ const fx=rs.filter(o=>TYPES[o.type][3]).reduce((s,o)=>s+o.amount,0)/loan;
+ if(sh>0.3334)w.push('מסלולים המשתנים בתדירות הנמוכה מ-5 שנים (פריים, מק"מ, משתנה כל שנה/שנתיים) חורגים מ-33% מההלוואה, מעבר למגבלת בנק ישראל.');
+ if(fx<0.3333)w.push('נדרש לפחות שליש מההלוואה במסלול קבוע (קבועה צמודה או לא צמודה).');
+ return w.map(x=>`<div class="warn">⚠ ${x}</div>`).join('');
+}
+function renderSummary(){
+ const rs=S.mixes[S.cur];if(!rs.length){$('summary').innerHTML='';return}
+ const c=mixCalc(rs);
+ const items=[['סך ההלוואה',fm(c.loan)],['החזר חודשי התחלתי',fm(c.first)],['החזר חודשי מקסימלי',fm(c.max)],['סך ריבית',fm(c.int)],['סך הצמדות מדד',fm(c.idx)],['החזר כולל',fm(c.tot)],['תשלום על כל שקל',c.ratio.toFixed(2)+' ₪'],['תקופה בפועל',Math.floor(c.len/12)+' שנים ו-'+(c.len%12)+' חודשים']];
+ $('summary').innerHTML=`<h2>סיכום: ${esc(S.names[S.cur])}</h2>${warnings(rs,c.loan)}<div class="sum">${items.map(([l,v])=>`<div><span>${l}</span><b>${v}</b></div>`).join('')}</div>`;
+}
+function renderCompare(){
+ const act=S.mixes.map((m,i)=>m.length?{i,c:mixCalc(m)}:null).filter(Boolean);
+ if(act.length<2){$('compare').innerHTML='<h2>השוואת תמהילים</h2><p class="sub">מלאו לפחות שני תמהילים כדי לראות השוואה.</p>';return}
+ const rowsDef=[['סך הלוואה',c=>fm(c.loan)],['החזר חודשי התחלתי',c=>fm(c.first)],['החזר מקסימלי',c=>fm(c.max)],['סך ריבית',c=>fm(c.int)],['סך הצמדות',c=>fm(c.idx)],['החזר כולל',c=>fm(c.tot)],['תשלום לכל שקל',c=>c.ratio.toFixed(2)]];
+ const W=640,H=240,P=44,maxT=Math.max(...act.map(a=>a.c.len)),maxY=Math.max(...act.map(a=>a.c.max))*1.1||1;
+ const X=t=>P+(W-P-10)*t/maxT,Y=v=>H-24-(H-44)*v/maxY;
+ const lines=act.map(a=>`<polyline fill="none" stroke="${COL[a.i]}" stroke-width="2.5" points="${a.c.m.map(r=>X(r.t)+','+Y(r.pay)).join(' ')}"/>`).join('');
+ const gl=[0,.5,1].map(f=>`<line x1="${P}" x2="${W-10}" y1="${Y(maxY*f/1.1*1.1)}" y2="${Y(maxY*f/1.1*1.1)}" stroke="var(--line)"/><text x="${P-4}" y="${Y(maxY*f)+4}" font-size="11" text-anchor="end" fill="var(--mut)">${NF.format(maxY*f)}</text>`).join('');
+ const xl=[0,.5,1].map(f=>`<text x="${X(maxT*f)}" y="${H-6}" font-size="11" text-anchor="middle" fill="var(--mut)">${(maxT*f/12).toFixed(0)} ש׳</text>`).join('');
+ $('compare').innerHTML=`<h2>השוואת תמהילים</h2>${recommend(act)}<div class="sc"><table><thead><tr><th></th>${act.map(a=>`<th style="color:${COL[a.i]}">${esc(S.names[a.i])}</th>`).join('')}</tr></thead><tbody>${rowsDef.map(([l,f])=>`<tr><th>${l}</th>${act.map(a=>`<td>${f(a.c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+ <h2 style="margin-top:14px">התפתחות ההחזר החודשי</h2><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="גרף התפתחות החזר חודשי לפי תמהיל" direction="ltr">${gl}${lines}${xl}</svg>`;
+}
+function recommend(act){
+ const sc=act.map(a=>{const rs=S.mixes[a.i],c=a.c,L=c.loan||1,p=k=>rs.filter(o=>TYPES[o.type][k]).reduce((s,o)=>s+o.amount,0)/L;return{a,ok:p(2)<=0.3334&&p(3)>=0.3333,r:c.ratio,m:c.max/L,f:c.first/L}});
+ const pool=sc.some(x=>x.ok)?sc.filter(x=>x.ok):sc;
+ const mn=k=>Math.max(1e-9,Math.min(...pool.map(x=>x[k])));
+ pool.forEach(x=>x.s=.5*x.r/mn('r')+.3*x.m/mn('m')+.2*x.f/mn('f'));
+ const best=pool.reduce((p,q)=>q.s<p.s?q:p);
+ const lo=k=>sc.reduce((p,q)=>q[k]<p[k]?q:p);
+ const nm=x=>'<b>'+esc(S.names[x.a.i])+'</b>';
+ const bad=sc.filter(x=>!x.ok),diff=new Set(act.map(a=>a.c.loan)).size>1;
+ return `<div class="rec"><h3 style="margin:0 0 6px">התמהיל המומלץ: ${nm(best)}</h3>
+ <div>הזול ביותר בסך הכול: ${nm(lo('r'))} · החזר התחלתי נמוך ביותר: ${nm(lo('f'))} · החזר מקסימלי נמוך ביותר: ${nm(lo('m'))}</div>
+ ${bad.length?`<div class="warn">⚠ ${bad.map(nm).join(', ')} חורג ממגבלות בנק ישראל${bad.length<sc.length?' ולכן לא נכלל בהמלצה':', ההמלצה מתייחסת לכל התמהילים'}.</div>`:''}
+ ${diff?'<div class="note">סכומי ההלוואה שונים, ולכן ההשוואה נעשית ביחס לכל שקל שנלקח.</div>':''}
+ <div class="note">הציון משקלל עלות כוללת (50%), החזר מקסימלי (30%) והחזר התחלתי (20%), ביחס לסכום ההלוואה. זו המלצה חישובית על בסיס הנתונים שהוזנו בלבד, ללא התחשבות בהכנסה, בהון עצמי או ביכולת לספוג עליית ריבית, ואינה ייעוץ.</div></div>`;
+}
+function renderSchedule(){
+ const rs=S.mixes[S.cur];if(!rs.length){$('schedule').innerHTML='';return}
+ const c=mixCalc(rs);let rows=c.m;
+ if(S.view==='year')rows=rows.filter(r=>(r.t-1)%12===0);
+ $('schedule').innerHTML=`<div class="row" style="margin:0 0 8px"><h2 style="margin:0">לוח סילוקין – ${esc(S.names[S.cur])}</h2><span><button class="${S.view==='year'?'btn':'btn o'}" data-v="year">שנתי</button> <button class="${S.view==='month'?'btn':'btn o'}" data-v="month">חודשי</button></span></div>
+ <div class="sc" style="max-height:420px;overflow-y:auto"><table><thead><tr><th>חודש</th><th>החזר חודשי</th><th>קרן</th><th>ריבית</th><th>הצמדה</th><th>סילוק</th><th>יתרה</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r.t}</td><td>${fm(r.pay)}</td><td>${fm(r.prin)}</td><td>${fm(r.int)}</td><td>${fm(r.idx)}</td><td>${r.lump?fm(r.lump):'-'}</td><td>${fm(r.bal)}</td></tr>`).join('')}</tbody></table></div>
+ <div class="row"><button class="lnk" id="prn">הדפסה / שמירה כ-PDF</button></div>`;
+ $('schedule').querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{S.view=b.dataset.v;renderSchedule()});
+ $('prn').onclick=()=>window.print();
+}
+function renderAll(){save();renderTabs();const cmp=S.screen==='compare';['editor','summary','schedule'].forEach(id=>$(id).hidden=cmp);$('compare').hidden=!cmp;if(cmp)renderCompare();else{renderEditor();renderSummary();renderSchedule()}}
+function enc(){return btoa(unescape(encodeURIComponent(JSON.stringify({v:1,mixes:S.mixes,names:S.names}))))}
+function dec(s){return JSON.parse(decodeURIComponent(escape(atob(s.trim().replace(/\s+/g,'')))))}
+function clean(r){const t=TYPES[r&&r.type]?r.type:'kz';const o=Object.assign(newRoute(t),r);o.type=t;for(const k of['amount','months','rate','index','grace','rcMonth','rcDelta','erMonth','erAmt'])o[k]=Number(o[k])||0;o.indexed=!!o.indexed;o.rc=!!o.rc;o.er=!!o.er;o.erFull=!!o.erFull;o.adv=!!o.adv;o.method=['spitzer','equal','bullet'].includes(o.method)?o.method:'spitzer';o.erMode=o.erMode==='reduce'?'reduce':'shorten';return o}
+$('sv').onclick=()=>{save();$('svm').textContent='נשמר ✓'};
+$('exp').onclick=()=>{const code=enc(),sh=$('share');sh.hidden=false;
+ sh.innerHTML=`<h2>ייצוא השוואה</h2><p class="sub">העתיקו את הקוד ושלחו אותו (וואטסאפ, מייל וכו'). מי שמקבל אותו מדביק אותו ב"ייבוא השוואה" ורואה את אותם תמהילים, כולל השמות.</p><textarea id="code" readonly rows="5">${code}</textarea><div class="row"><button class="btn" id="cp">העתקה</button><button class="lnk" id="cl">סגירה</button></div>`;
+ $('code').onclick=e=>e.target.select();
+ $('cp').onclick=async()=>{try{await navigator.clipboard.writeText(code);$('cp').textContent='הועתק ✓'}catch(e){$('code').select();$('cp').textContent='סמנו והעתיקו ידנית'}};
+ $('cl').onclick=()=>sh.hidden=true};
+$('imp').onclick=()=>{const sh=$('share');sh.hidden=false;
+ sh.innerHTML=`<h2>ייבוא השוואה</h2><p class="sub">הדביקו כאן קוד שקיבלתם. הייבוא מחליף את כל התמהילים הנוכחיים.</p><textarea id="code" rows="5"></textarea><div class="warn" id="err"></div><div class="row"><button class="btn" id="go">ייבוא</button><button class="lnk" id="cl">סגירה</button></div>`;
+ $('cl').onclick=()=>sh.hidden=true;
+ $('go').onclick=()=>{try{const d=dec($('code').value);if(!Array.isArray(d.mixes)||d.mixes.length>4)throw 0;const mx=[0,1,2,3].map(i=>(Array.isArray(d.mixes[i])?d.mixes[i]:[]).slice(0,10).map(clean));const nm=[0,1,2,3].map(i=>String((d.names||[])[i]||'תמהיל '+(i+1)).slice(0,30));S.mixes=mx;S.names=nm;S.cur=0;S.screen='compare';sh.hidden=true;renderAll()}catch(e){$('err').textContent='הקוד לא תקין. ודאו שהעתקתם אותו במלואו.'}}};
+renderAll();
+</script>
+</body>
+</html>
