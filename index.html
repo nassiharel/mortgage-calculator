@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>מחשבון משכנתא – השוואת הצעות</title>
+<meta name="description" content="מחשבון משכנתא מתקדם: בניית תמהיל, מסלולים צמודים ולא צמודים, פריים, גרייס, סילוק מוקדם והשוואה בין עד 4 הצעות.">
+<meta name="color-scheme" content="light dark">
+<script>
+  // Apply theme before first paint to avoid a flash
+  (function () {
+    try {
+      var t = localStorage.getItem('mc.theme');
+      if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  })();
+</script>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<a class="skip" href="#main">דילוג לתוכן</a>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path fill="currentColor" d="M12 3 2 11h3v9h6v-6h2v6h6v-9h3z"/></svg>
+      <div>
+        <h1>מחשבון משכנתא</h1>
+        <p class="tagline">בנו תמהיל, השוו עד 4 הצעות ושתפו</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <span id="save-status" class="save-status" aria-live="polite"></span>
+      <button class="btn" id="btn-save" type="button" title="שמירה במכשיר זה">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h11l5 5v13H3V3zm2 2v5h9V5zm5 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg><span>שמירה</span></button>
+      <button class="btn" id="btn-library" type="button" title="השוואות שמורות">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6l2 2h8v14H4z"/></svg><span>השוואות שמורות</span></button>
+      <button class="btn btn-primary" id="btn-share" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 16a3 3 0 0 0-2.4 1.2l-6.7-3.4a3 3 0 0 0 0-1.6l6.7-3.4A3 3 0 1 0 15 7l-6.7 3.4a3 3 0 1 0 0 3.2L15 17a3 3 0 1 0 3-1z"/></svg><span>שיתוף</span></button>
+      <button class="btn btn-icon" id="btn-theme" type="button" aria-label="מעבר למצב כהה" aria-pressed="false">
+        <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="container">
+  <div id="banner" class="banner" hidden></div>
+
+  <section class="card title-card">
+    <label class="title-field">
+      <span class="sr-only">שם ההשוואה</span>
+      <input id="comparison-title" type="text" maxlength="80" placeholder="שם ההשוואה (למשל: דירה ברמת גן – הצעות בנקים)">
+    </label>
+    <div class="title-actions">
+      <button class="btn btn-ghost" id="btn-new" type="button">השוואה חדשה</button>
+    </div>
+  </section>
+
+  <!-- Step 1: assumptions -->
+  <section class="card" aria-labelledby="assumptions-h">
+    <details id="assumptions" open>
+      <summary><h2 id="assumptions-h"><span class="step">1</span>הנחות כלליות</h2><span class="summary-hint" id="assumptions-hint"></span></summary>
+      <div class="grid-assume">
+        <div class="field">
+          <label for="sc-prime">ריבית פריים נוכחית <button type="button" class="info" data-term="prime" aria-label="מה זה פריים?">i</button></label>
+          <div class="input-suffix"><input id="sc-prime" data-scope="scenario" data-key="prime" inputmode="decimal" dir="ltr"><span>%</span></div>
+          <small class="help">ריבית בנק ישראל + 1.5%. עדכנו לפי הריבית הידועה.</small>
+        </div>
+        <div class="field">
+          <label for="sc-cpi">מדד שנתי צפוי <button type="button" class="info" data-term="cpi" aria-label="מה זה מדד?">i</button></label>
+          <div class="input-suffix"><input id="sc-cpi" data-scope="scenario" data-key="cpi" inputmode="decimal" dir="ltr"><span>%</span></div>
+          <small class="help">משמש כברירת מחדל במסלולים צמודים.</small>
+        </div>
+        <div class="field stress">
+          <label class="check"><input type="checkbox" id="sc-stress" data-scope="scenario" data-key="stressOn"> מבחן לחץ למסלולים משתנים</label>
+          <div class="stress-row">
+            <span>עלייה של</span>
+            <div class="input-suffix sm"><input id="sc-stress-delta" data-scope="scenario" data-key="stressDelta" inputmode="decimal" dir="ltr" aria-label="גובה עליית הריבית"><span>%</span></div>
+            <span>מחודש</span>
+            <input class="sm" id="sc-stress-month" data-scope="scenario" data-key="stressMonth" inputmode="numeric" dir="ltr" aria-label="חודש תחילת העלייה">
+          </div>
+          <small class="help">מחיל עליית ריבית על כל המסלולים המשתנים בכל ההצעות – להשוואת סיכון הוגנת.</small>
+        </div>
+      </div>
+      <details class="sub-details" id="borrower-details">
+        <summary>פרטים אישיים לבדיקת מגבלות בנק ישראל (רשות)</summary>
+        <div class="grid-assume">
+          <div class="field">
+            <label for="b-income">הכנסה חודשית פנויה (נטו)</label>
+            <div class="input-suffix"><input id="b-income" data-scope="borrower" data-key="income" inputmode="numeric" dir="ltr" data-money><span>₪</span></div>
+          </div>
+          <div class="field">
+            <label for="b-value">שווי הנכס</label>
+            <div class="input-suffix"><input id="b-value" data-scope="borrower" data-key="propertyValue" inputmode="numeric" dir="ltr" data-money><span>₪</span></div>
+          </div>
+          <div class="field">
+            <label for="b-type">סוג הרכישה <button type="button" class="info" data-term="ltv" aria-label="מה זה שיעור מימון?">i</button></label>
+            <select id="b-type" data-scope="borrower" data-key="propertyType"></select>
+          </div>
+        </div>
+      </details>
+    </details>
+  </section>
+
+  <!-- Step 2: offers -->
+  <section class="card" aria-labelledby="offers-h">
+    <div class="section-head">
+      <h2 id="offers-h"><span class="step">2</span>הצעות משכנתא</h2>
+      <p class="muted">הזינו כל הצעה שקיבלתם מבנק (או תמהיל שאתם בוחנים). אפשר לשכפל הצעה ולשנות רק את הריביות.</p>
+    </div>
+    <div class="offer-tabs" role="tablist" id="offer-tabs" aria-label="הצעות"></div>
+    <div id="offer-panel" role="tabpanel"></div>
+  </section>
+
+  <!-- Step 3: comparison -->
+  <section class="card" aria-labelledby="compare-h" id="compare-section">
+    <div class="section-head">
+      <h2 id="compare-h"><span class="step">3</span>השוואת הצעות</h2>
+    </div>
+    <div id="compare"></div>
+  </section>
+
+  <section class="card disclaimer">
+    <h2>חשוב לדעת</h2>
+    <ul>
+      <li>החישובים הם <strong>הערכה</strong> בלבד, על בסיס ההנחות שהזנתם (ריבית, מדד, פריים). בפועל הריבית במסלולים משתנים, המדד ושערי המטבע ישתנו.</li>
+      <li>החישוב משתמש בריבית נומינלית שנתית חלקי 12 ובהצמדה חודשית למדד – כמקובל בלוחות הסילוקין של הבנקים בישראל. ייתכנו הבדלים קטנים מול הבנק בעיגול ובמועדי התשלום.</li>
+      <li>לא נכללים: ביטוח חיים ומבנה, עמלת פירעון מוקדם, עמלות שלא הזנתם, ושינויי שער במסלולי מט"ח.</li>
+      <li>טווחי הריבית המוצגים הם אינדיקטיביים בלבד ואינם הצעה. ההחלטה צריכה להתבסס על הצעות הבנקים בכתב ועל ייעוץ מקצועי.</li>
+    </ul>
+  </section>
+</main>
+
+<footer class="footer container">
+  <span>הנתונים נשמרים רק בדפדפן שלכם. קישור שיתוף מכיל את כל הנתונים בתוך הכתובת עצמה.</span>
+</footer>
+
+<!-- Amortization dialog -->
+<dialog id="schedule-dialog" aria-labelledby="schedule-title">
+  <div class="dialog-head">
+    <h2 id="schedule-title">לוח סילוקין</h2>
+    <button class="btn btn-icon" type="button" data-close aria-label="סגירה">✕</button>
+  </div>
+  <div class="dialog-tools">
+    <div class="seg" role="group" aria-label="תצוגה">
+      <button type="button" data-view="yearly" aria-pressed="true">שנתי</button>
+      <button type="button" data-view="monthly" aria-pressed="false">חודשי</button>
+    </div>
+    <label class="inline">מסלול:
+      <select id="schedule-track"></select>
+    </label>
+    <span class="spacer"></span>
+    <button class="btn" type="button" id="btn-csv">ייצוא ל-Excel (CSV)</button>
+    <button class="btn" type="button" id="btn-print">הדפסה</button>
+  </div>
+  <div id="schedule-summary" class="schedule-summary"></div>
+  <div class="table-wrap" id="schedule-table"></div>
+</dialog>
+
+<!-- Library dialog -->
+<dialog id="library-dialog" aria-labelledby="library-title">
+  <div class="dialog-head">
+    <h2 id="library-title">השוואות שמורות</h2>
+    <button class="btn btn-icon" type="button" data-close aria-label="סגירה">✕</button>
+  </div>
+  <div id="library-list"></div>
+</dialog>
+
+<!-- Share dialog -->
+<dialog id="share-dialog" aria-labelledby="share-title">
+  <div class="dialog-head">
+    <h2 id="share-title">שיתוף ההשוואה</h2>
+    <button class="btn btn-icon" type="button" data-close aria-label="סגירה">✕</button>
+  </div>
+  <p class="muted">כל מי שיפתח את הקישור יראה את כל ההצעות, ההנחות והחישובים בדיוק כפי שהם עכשיו, ויוכל לערוך ולשמור עותק משלו.</p>
+  <div class="share-row">
+    <input id="share-url" type="text" readonly dir="ltr" aria-label="קישור לשיתוף">
+    <button class="btn btn-primary" type="button" id="btn-copy">העתקה</button>
+  </div>
+  <div class="share-row">
+    <a class="btn" id="share-whatsapp" target="_blank" rel="noopener">שליחה בוואטסאפ</a>
+    <a class="btn" id="share-email">שליחה במייל</a>
+    <button class="btn" type="button" id="btn-native-share" hidden>שיתוף…</button>
+  </div>
+</dialog>
+
+<!-- Glossary popover -->
+<div id="popover" class="popover" role="tooltip" hidden></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="js/data.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/share.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
