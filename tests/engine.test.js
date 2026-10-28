@@ -184,6 +184,18 @@ test('Validation catches bad inputs and BoI one-third fixed rule', () => {
   assert.ok(g.some((e) => e.field === 'graceMonths'));
 });
 
+test('Variable every 2 years unlinked: variable, not CPI-linked, stress applies', () => {
+  const td = D.TRACK_BY_ID.var2_unlinked;
+  assert.ok(td && td.kind === 'variable' && !td.linked);
+  assert.equal(D.indicativeRange('var2_unlinked', 240), null);
+  const s = E.scheduleTrack(track({ type: 'var2_unlinked', months: 240, rate: 4.5, cpi: 3 }), { stressDelta: 1, stressMonth: 25 });
+  assert.equal(s.summary.totalIndexation, 0);
+  assert.equal(s.rows[23].rate, 4.5);
+  assert.equal(s.rows[24].rate, 5.5);
+  assert.deepEqual(E.validateTrack(track({ type: 'var2_unlinked', months: 240 })), []);
+  assert.ok(E.validateTrack(track({ type: 'var2_unlinked', months: 250 })).some((e) => e.field === 'months' && e.soft));
+});
+
 test('Indicative range lookup', () => {
   assert.deepEqual(D.indicativeRange('fixed_unlinked', 300), { min: 4.75, max: 5.25 });
   assert.deepEqual(D.indicativeRange('fixed_linked', 48), { min: 2.5, max: 3.5 });

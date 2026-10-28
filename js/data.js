@@ -38,6 +38,11 @@
     { id: 'var5_unlinked', name: 'משתנה כל 5 לא צמודה (מל"צ)', short: 'מל"צ 5', kind: 'variable', linked: false, rateMode: 'rate', durations: [60, 120, 180, 240, 300, 360],
       desc: 'ריבית המתעדכנת כל 5 שנים לפי עוגן (תשואת אג"ח ממשלתי), ללא הצמדה למדד.',
       range: { 5: [4.25, 5], 10: [4.25, 5], 15: [4.25, 5], 20: [4.25, 5], 25: [4.25, 5.25], 30: [4.25, 5.25] } },
+    { id: 'var2_unlinked', name: 'משתנה כל שנתיים לא צמודה', short: 'מל"צ 2', kind: 'variable', linked: false, rateMode: 'rate',
+      durations: range(24, 360, 24),
+      desc: 'ריבית המתעדכנת כל שנתיים לפי עוגן, ללא הצמדה למדד.',
+      // The reference site publishes no range for this track, so no indicative range is shown.
+      range: {} },
     { id: 'zakaut', name: 'זכאות משרד השיכון', short: 'זכאות', kind: 'fixed', linked: true, rateMode: 'rate', durations: null,
       desc: 'הלוואה בתנאים מועדפים למי שקיבל תעודת זכאות ממשרד הבינוי והשיכון. ריבית קבועה צמודה למדד, בסכום מוגבל.',
       range: { 10: [2.31, 2.31], 15: [2.35, 2.35], 20: [2.41, 2.41], 25: [2.65, 2.65], 30: [2.72, 2.72] } },
